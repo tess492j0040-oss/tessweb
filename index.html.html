@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>教師與學生 AI 素養框架情境測驗與檢視報告</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+        .fade-in {
+            animation: fadeIn 0.4s cubic-bezier(0.39, 0.575, 0.565, 1) both;
+        }
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        .prose p { margin-bottom: 0.75rem; line-height: 1.6; }
+        .prose ul { list-style-type: disc; padding-left: 1.25rem; margin-bottom: 0.75rem; }
+        .prose h3 { font-size: 1.25rem; font-weight: 700; margin-top: 1rem; margin-bottom: 0.5rem; color: #334155; }
+        .prose h4 { font-size: 1.1rem; font-weight: 600; margin-top: 0.75rem; margin-bottom: 0.25rem; color: #475569; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between">
+
+    <!-- 頂部導覽列 -->
+    <header class="bg-indigo-700 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <i class="fa-solid fa-brain text-2xl text-amber-300"></i>
+                <h1 class="text-xl font-bold tracking-wide">AI 素養框架情境診斷與檢視</h1>
+            </div>
+            <span id="header-tag" class="text-xs bg-indigo-800 px-3 py-1 rounded-full text-indigo-200">中小學教師與學生導向</span>
+        </div>
+    </header>
+
+    <!-- 主要內容區塊 -->
+    <main class="max-w-4xl mx-auto px-4 py-8 flex-grow w-full">
+
+        <!-- 歡迎/開始畫面 -->
+        <section id="start-card" class="bg-white rounded-2xl shadow-xl p-6 md:p-10 text-center border border-slate-100 fade-in">
+            <div class="w-20 h-20 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl">
+                <i class="fa-solid fa-graduation-cap"></i>
+            </div>
+            <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900 mb-4">中小學教師與學生 AI 素養框架情境測驗</h2>
+            <p class="text-slate-600 max-w-2xl mx-auto mb-6 leading-relaxed">
+                本測驗依據《115 年中小學教師數位與 AI 教學指引》設計，涵蓋四大面向（AI 倫理、AI 基礎與技術、AI 賦能教學/學習、AI 促進專業發展/系統設計）與三個螺旋遞進層級（取得理解、深化應用、創造轉型）。
+            </p>
+            <div class="flex flex-wrap justify-center gap-3 mb-8 text-xs font-semibold text-slate-500">
+                <span class="bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200"><i class="fa-solid fa-layer-group text-indigo-500 mr-1"></i> 共 10 題實務情境</span>
+                <span class="bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200"><i class="fa-solid fa-circle-question text-indigo-500 mr-1"></i> 每題 2 個問題</span>
+                <span class="bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200"><i class="fa-solid fa-robot text-indigo-500 mr-1"></i> AI 建議報告生成</span>
+                <span class="bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200"><i class="fa-solid fa-user-slash text-indigo-500 mr-1"></i> 免登入免留個資</span>
+            </div>
+            <button id="start-btn" onclick="startQuiz()" class="px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg hover:shadow-indigo-200 transition-all transform hover:-translate-y-0.5 text-lg cursor-pointer">
+                <i class="fa-solid fa-play mr-2"></i> 開始情境作答
+            </button>
+        </section>
+
+        <!-- 測驗進行畫面 -->
+        <section id="quiz-card" class="hidden fade-in">
+            <!-- 進度條 -->
+            <div class="mb-6">
+                <div class="flex justify-between items-center text-sm font-semibold text-slate-500 mb-2">
+                    <span id="quiz-progress-text">第 1 / 10 題</span>
+                    <span id="quiz-percent-text">10%</span>
+                </div>
+                <div class="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
+                    <div id="quiz-progress-bar" class="bg-indigo-600 h-2.5 rounded-full transition-all duration-300" style="width: 10%"></div>
+                </div>
+            </div>
+
+            <!-- 情境題目容器 -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8 border border-slate-100 mb-6">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="inline-block bg-indigo-100 text-indigo-700 text-xs font-bold px-3 py-1 rounded-full" id="scenario-tag">
+                        簡單程度
+                    </span>
+                    <span class="text-xs text-slate-400 font-medium" id="scenario-id">第 1 題</span>
+                </div>
+                <h3 class="text-lg md:text-xl font-bold text-slate-900 mb-3" id="scenario-title">情境載入中...</h3>
+                <div class="text-slate-700 bg-indigo-50/50 p-4 rounded-xl mb-6 text-sm md:text-base leading-relaxed border-l-4 border-indigo-500" id="scenario-desc">
+                    情境描述...
+                </div>
+
+                <!-- 問題 1 -->
+                <div class="mb-8 border-b border-slate-100 pb-6">
+                    <h4 class="font-bold text-slate-900 mb-3 flex items-start text-sm md:text-base">
+                        <span class="bg-indigo-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs mr-2 shrink-0 mt-0.5">Q1</span>
+                        <span id="q1-text">此情境主要屬於教師 AI 素養框架的哪一個「面向」？</span>
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="q1-options">
+                        <!-- 選項由 JS 動態生成 -->
+                    </div>
+                </div>
+
+                <!-- 問題 2 -->
+                <div class="mb-2">
+                    <h4 class="font-bold text-slate-900 mb-3 flex items-start text-sm md:text-base">
+                        <span class="bg-indigo-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs mr-2 shrink-0 mt-0.5">Q2</span>
+                        <span id="q2-text">此情境主要屬於哪一個發展「層級」？</span>
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3" id="q2-options">
+                        <!-- 選項由 JS 動態生成 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 按鈕區 -->
+            <div class="flex justify-between items-center">
+                <p id="error-msg" class="text-rose-500 text-sm font-medium hidden">
+                    <i class="fa-solid fa-circle-exclamation mr-1"></i> 請完成本題的 2 個問題後再進入下一題！
+                </p>
+                <button id="next-btn" onclick="nextQuestion()" class="ml-auto px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow transition flex items-center cursor-pointer">
+                    <span id="next-btn-text">下一題</span>
+                    <i class="fa-solid fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- 測驗完成與錯題檢討畫面 -->
+        <section id="results-card" class="hidden fade-in">
+            <!-- 成績摘要卡片 -->
+            <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8 text-center border border-slate-100 mb-8">
+                <div class="inline-flex items-center justify-center p-4 bg-emerald-100 text-emerald-600 rounded-full mb-4">
+                    <i class="fa-solid fa-square-check text-4xl"></i>
+                </div>
+                <h2 class="text-2xl font-extrabold text-slate-900 mb-2">測驗完成！</h2>
+                <p class="text-slate-600 mb-6 text-sm md:text-base">您已順利完成全部 10 題 AI 素養框架情境評估。</p>
+                
+                <div class="flex justify-center items-center space-x-6 bg-slate-50 py-4 px-6 rounded-xl max-w-sm mx-auto mb-6 border border-slate-200">
+                    <div>
+                        <span class="block text-xs text-slate-500 font-medium">總正確率</span>
+                        <span id="score-text" class="text-3xl font-black text-indigo-600">0%</span>
+                    </div>
+                    <div class="w-px h-10 bg-slate-200"></div>
+                    <div>
+                        <span class="block text-xs text-slate-500 font-medium">答對小題數</span>
+                        <span id="correct-count-text" class="text-3xl font-black text-slate-800">0 / 20</span>
+                    </div>
+                </div>
+
+                <!-- 產生專業檢視報告按鈕 -->
+                <button id="generate-report-btn" onclick="generateAIReport()" class="px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-extrabold rounded-xl shadow-lg hover:shadow-indigo-200 transition transform hover:-translate-y-0.5 text-lg w-full md:w-auto cursor-pointer">
+                    <i class="fa-solid fa-wand-magic-sparkles mr-2"></i> 產生自我檢視報告
+                </button>
+            </div>
+
+            <!-- AI 檢視報告容器 -->
+            <div id="ai-report-container" class="hidden bg-white rounded-2xl shadow-xl p-6 md:p-8 border border-indigo-100 mb-8 fade-in">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="bg-purple-100 text-purple-600 p-2.5 rounded-xl">
+                            <i class="fa-solid fa-file-invoice text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-900">教師 AI 素養自我檢視報告</h3>
+                    </div>
+                    <span class="text-xs bg-purple-50 text-purple-700 px-3 py-1 rounded-full border border-purple-200 font-medium">AI 智慧分析</span>
+                </div>
+
+                <!-- 報告載入中畫面 -->
+                <div id="report-loading" class="py-12 text-center">
+                    <i class="fa-solid fa-spinner fa-spin text-4xl text-indigo-600 mb-4"></i>
+                    <p class="text-slate-600 font-medium">正在根據您的作答表現生成專屬建議報告，請稍候...</p>
+                </div>
+
+                <!-- 報告內容 -->
+                <div id="report-content" class="prose max-w-none text-slate-700 hidden">
+                    <!-- 由 AI 生成填充 -->
+                </div>
+            </div>
+
+            <!-- 錯題檢討區塊 -->
+            <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8 border border-slate-100 mb-8">
+                <div class="flex items-center space-x-3 border-b border-slate-100 pb-4 mb-6">
+                    <div class="bg-rose-100 text-rose-600 p-2.5 rounded-xl">
+                        <i class="fa-solid fa-list-check text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-900">答錯題目解析與正確答案</h3>
+                        <p class="text-xs text-slate-500">詳細比對正確答案與指標內涵對照</p>
+                    </div>
+                </div>
+
+                <div id="wrong-questions-list" class="space-y-6">
+                    <!-- 錯題內容將由 JS 生成 -->
+                </div>
+            </div>
+
+            <!-- 重新測試按鈕 -->
+            <div class="text-center">
+                <button onclick="restartQuiz()" class="px-6 py-3 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl transition cursor-pointer">
+                    <i class="fa-solid fa-rotate-right mr-2"></i> 重新測驗
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <!-- 頁尾 -->
+    <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500">
+        <p>中小學教師與學生 AI 素養框架情境互動網頁 &copy; 2026 | 參考《115 年中小學教師數位與 AI 教學指引》</p>
+    </footer>
+
+    <!-- 題目數據與邏輯腳本 -->
+    <script>
+        // 10 題情境測驗完整資料庫
+        const questionsData = [
+            {
+                id: 1,
+                difficulty: "🟢 簡單",
+                title: "第 1 題：閱讀理解教材準備與個資防護",
+                description: "林老師在準備新學期的閱讀理解教材時，想使用生成式 AI 整理學生上一學期學習單中的錯別字與句型範例。在將學生學習單內容輸入至通用型 AI 工具前，林老師主動去除了所有學生的姓名、班級、座號與家庭背景等識別資訊，避免敏感資料上傳至公開平臺。",
+                q1: {
+                    text: "問題（1）：此情境主要屬於教師 AI 素養框架的哪一個「面向」？",
+                    options: [
+                        { label: "(A) AI 倫理", val: "A" },
+                        { label: "(B) AI 基礎與技術", val: "B" },
+                        { label: "(C) AI 賦能教學", val: "C" },
+                        { label: "(D) AI 促進教師專業發展", val: "D" }
+                    ],
+                    correct: "A"
+                },
+                q2: {
+                    text: "問題（2）：此情境主要屬於哪一個發展「層級」？",
+                    options: [
+                        { label: "(A) 取得理解", val: "A" },
+                        { label: "(B) 深化應用", val: "B" },
+                        { label: "(C) 創造轉型", val: "C" }
+                    ],
+                    correct: "A"
+                },
+                indicator: "指標 1-1-2 / 表 2-1：能保護個資與 AI 數據隱私，主動防範個人資料洩漏風險。",
+                explanation: "林老師去除非必要之個人識別資訊（姓名、座號），屬於【AI 倫理】中的「保護個資與數據隱私」，且處於建立原則與防範意識的【取得理解】層級。"
+            },
+            {
+                id: 2,
+                difficulty: "🟢 簡單",
+                title: "第 2 題：自然科自主學習與事實查核",
+                description: "國中生小明在進行自然科自主學習時，使用生成式 AI 查詢「光合作用的詳細化學反應」。AI 產出了一段看起來流暢且專業的文字，但小明注意到其中提到的某個酵素名稱與課本不符。小明理解大型語言模型（LLM）本質上是基於統計機率預測下一個字詞，可能會產生「幻覺（Hallucination）」或虛構資訊，因此他沒有直接抄寫答案，而是回到因材網與教科書進行查證。",
+                q1: {
+                    text: "問題（1）：此情境主要屬於學生 AI 素養框架的哪一個「面向」？",
+                    options: [
+                        { label: "(A) AI 倫理", val: "A" },
+                        { label: "(B) AI 基礎與技術", val: "B" },
+                        { label: "(C) AI 賦能學習", val: "C" },
+                        { label: "(D) AI 系統設計", val: "D" }
+                    ],
+                    correct: "B"
+                },
+                q2: {
+                    text: "問題（2）：此情境主要屬於哪一個發展「層級」？",
+                    options: [
+                        { label: "(A) 取得理解", val: "A" },
+                        { label: "(B) 深化應用", val: "B" },
+                        { label: "(C) 創造轉型", val: "C" }
+                    ],
+                    correct: "A"
+                },
+                indicator: "指標 2-1-3 / 表 2-2：理解大型語言模型預測邏輯，警覺 AI 幻覺與風險，能進行事實查核。",
+                explanation: "學生小明能辨識大型語言模型可能產生的「幻覺」與風險，屬於【AI 基礎與技術】面向中建立技術本質洞察的【取得理解】層級。"
+            },
+            {
+                id: 3,
+                difficulty: "🟡 中等",
+                title: "第 3 題：慢 AI 與多輪提示詞寫作教學",
+                description: "張老師在設計英語寫作課程時，結合 AIPACK（人工智慧教學內容知識）概念。他安排 AI 擔任學生的「虛擬寫作教練」，並採用「慢 AI」模式：要求 AI 不可直接替學生寫出全文，而是透過多輪對話（Iterative Prompting）針對學生輸入的作文初稿提出語法結構與文章邏輯的「引導性提問」，引導學生進行自主修正與概念內化。",
+                q1: {
+                    text: "問題（1）：此情境主要屬於教師 AI 素養框架的哪一個「面向」？",
+                    options: [
+                        { label: "(A) AI 倫理", val: "A" },
+                        { label: "(B) AI 基礎與技術", val: "B" },
+                        { label: "(C) AI 賦能教學", val: "C" },
+                        { label: "(D) AI 促進教師專業發展", val: "D" }
+                    ],
+                    correct: "C"
+                },
+                q2: {
+                    text: "問題（2）：此情境主要屬於哪一個發展「層級」？",
+                    options: [
+                        { label: "(A) 取得理解", val: "A" },
+                        { label: "(B) 深化應用", val: "B" },
+                        { label: "(C) 創造轉型", val: "C" }
+                    ],
+                    correct: "B"
+                },
+                indicator: "指標 3-2-2 / 表 2-1：運用 AIPACK 專業知識整合 AI 與教學法（慢 AI/多輪提示），引導適應性修正。",
+                explanation: "張老師結合 AIPACK 概念，透過「慢 AI」與多輪提示詞（Iterative Prompting）引導學生主動思考而非直接代寫，屬於【AI 賦能教學】面向的【深化應用】層級。"
+            },
+            {
+                id: 4,
+                difficulty: "🟡 中等",
+                title: "第 4 題：班級 AI 使用公約與責任邊界",
+                description: "王老師在指導國中學生進行社會領域「在地文化探究」專題時，帶領全班討論並制定了「班級 AI 使用公約」。公約規定學生在專題發想與資料架構整理階段可以善用 AI，但必須在作品附錄中詳細標記提示詞（Prompt）、AI 生成內容與事實查核紀錄，且最終的思考判斷與文責仍須由學生自行承擔。",
+                q1: {
+                    text: "問題（1）：此情境主要屬於教師 AI 素養框架的哪一個「面向」？",
+                    options: [
+                        { label: "(A) AI 倫理", val: "A" },
+                        { label: "(B) AI 基礎與技術", val: "B" },
+                        { label: "(C) AI 賦能教學", val: "C" },
+                        { label: "(D) AI 促進教師專業發展", val: "D" }
+                    ],
+                    correct: "A"
+                },
+                q2: {
+                    text: "問題（2）：此情境主要屬於哪一個發展「層級」？",
+                    options: [
+                        { label: "(A) 取得理解", val: "A" },
+                        { label: "(B) 深化應用", val: "B" },
+                        { label: "(C) 創造轉型", val: "C" }
+                    ],
+                    correct: "B"
+                },
+                indicator: "指標 1-2-3 / 表 2-1：內化 AI 倫理教學責任，制定與落實「班級 AI 使用公約」，明確標記提示詞與歷程。",
+                explanation: "帶領學生共同簽署「班級 AI 使用公約」、要求標記提示詞與查證歷程，是將倫理轉化為校園/班級治理規範，屬於【AI 倫理】的【深化應用】層級。"
+            },
+            {
+                id: 5,
+                difficulty: "🟡 中等",
+                title: "第 5 題：教師社群 PLC 模擬演練與專業反思",
+                description: "陳老師參加校內的教師專業學習社群（PLC），在社群共備活動中，陳老師運用生成式 AI 打造「模擬學生與家長對話情境」，針對複雜的班級經營衝突與特殊學習需求進行溝通演練，並將對話紀錄與社群同儕進行數據驅動的專業反思與教案對話。",
+                q1: {
+                    text: "問題（1）：此情境主要屬於教師 AI 素養框架的哪一個「面向」？",
+                    options: [
+                        { label: "(A) AI 倫理", val: "A" },
+                        { label: "(B) AI 基礎與技術", val: "B" },
+                        { label: "(C) AI 賦能教學", val: "C" },
+                        { label: "(D) AI 促進教師專業發展", val: "D" }
+                    ],
+                    correct: "D"
+                },
+                q2: {
+                    text: "問題（2）：此情境主要屬於哪一個發展「層級」？",
+                    options: [
+                        { label: "(A) 取得理解", val: "A" },
+                        { label: "(B) 深化應用", val: "B" },
+                        { label: "(C) 創造轉型", val: "C" }
+                    ],
+                    correct: "B"
+                },
+                indicator: "指標 4-2-3 / 表 2-1：運用生成式 AI 模擬班級經營或情境演練，並進行數據驅動的社群反思。",
+                explanation: "運用 AI 打造「模擬教練/模擬學生」演練班級經營與教學情境，屬於【AI 促進教師專業發展】面向中「數據與模擬驅動專業發展」的【深化應用】層級。"
+            },
+            {
+                id: 6,
+                difficulty: "🟡 中等",
+                title: "第 6 題：雨量預測 AI 模型開發與專案管理",
+                description: "高職資訊科學生小華與團隊成員在進行專題實作時，運用低程式碼（Low-code）雲端平臺，將採集到的校園微氣候感測數據進行標註與訓練，建立一個雨量預測的 AI 模型，並利用數位協作工具管理專案進度與修正歷程。",
+                q1: {
+                    text: "問題（1）：此情境主要屬於學生 AI 素養框架的哪一個「面向」？",
+                    options: [
+                        { label: "(A) AI 倫理", val: "A" },
+                        { label: "(B) AI 基礎與技術", val: "B" },
+                        { label: "(C) AI 賦能學習", val: "C" },
+                        { label: "(D) AI 系統設計", val: "D" }
+                    ],
+                    correct: "D"
+                },
+                q2: {
+                    text: "問題（2）：此情境主要屬於哪一個發展「層級」？",
+                    options: [
+                        { label: "(A) 取得理解", val: "A" },
+                        { label: "(B) 深化應用", val: "B" },
+                        { label: "(C) 創造轉型", val: "C" }
+                    ],
+                    correct: "B"
+                },
+                indicator: "表 2-2（學生）：應用設計思維於 AI 系統開發，善用 Low-code 平臺與開發工具執行專案管理。",
+                explanation: "學生使用低程式碼工具進行資料訓練、模型建立與團隊專案管理，屬於【學生 AI 系統設計】面向中「應用設計思維於開發」的【深化應用】層級。"
+            },
+            {
+                id: 7,
+                difficulty: "🔴 困難",
+                title: "第 7 題：智慧校園管理與 AI Agent 設計",
+                description: "李主任在推動學校智慧校園管理時，設計並部署了一個具備「人類監督節點（Human Oversight）」的「人工智慧代理人（AI Agent）」系統。該系統能依據學校日曆與目標自動拆解行政流程、調用歷年資料並產出活動企劃初稿；而李主任與教師團隊則在人工審核確定後執行，並將節省下來的行政時間轉化為與學生的深層互動與社會情緒學習（SEL）支持。",
+                q1: {
+                    text: "問題（1）：此情境主要屬於教師 AI 素養框架的哪一個「面向」？",
+                    options: [
+                        { label: "(A) AI 倫理", val: "A" },
+                        { label: "(B) AI 基礎與技術", val: "B" },
+                        { label: "(C) AI 賦能教學", val: "C" },
+                        { label: "(D) AI 促進教師專業發展", val: "D" }
+                    ],
+                    correct: "B"
+                },
+                q2: {
+                    text: "問題（2）：此情境主要屬於哪一個發展「層級」？",
+                    options: [
+                        { label: "(A) 取得理解", val: "A" },
+                        { label: "(B) 深化應用", val: "B" },
+                        { label: "(C) 創造轉型", val: "C" }
+                    ],
+                    correct: "C"
+                },
+                indicator: "指標 2-3-1 / 表 2-1：建構 AI 自動化流程，設計部署具人類監督節點的「人工智慧代理人（AI Agent）」。",
+                explanation: "設計部署具備「人類監督節點」的「人工智慧代理人（AI Agent）」處理自動化行政/教學流程，釋放時間於人文關懷，屬於【AI 基礎與技術】面向的【創造轉型】最高層級。"
+            },
+            {
+                id: 8,
+                difficulty: "🔴 困難",
+                title: "第 8 題：跨校聯盟、RAG 數據優化與校園文化",
+                description: "黃校長與跨校領頭教師團隊發起「AI 教學共創聯盟」。為了降低通用型 AI 在在地歷史與文化教學中的文化偏誤，團隊運用檢索增強生成（RAG）技術，將經過嚴謹審核的校本史料注入 AI 系統中進行數據優化，引領全校重塑跨領域課程，並建立制度化的校園 AI 協作指引與組織學習文化。",
+                q1: {
+                    text: "問題（1）：此情境主要屬於教師 AI 素養框架的哪一個「面向」？",
+                    options: [
+                        { label: "(A) AI 倫理", val: "A" },
+                        { label: "(B) AI 基礎與技術", val: "B" },
+                        { label: "(C) AI 賦能教學", val: "C" },
+                        { label: "(D) AI 促進教師專業發展", val: "D" }
+                    ],
+                    correct: "D"
+                },
+                q2: {
+                    text: "問題（2）：此情境主要屬於哪一個發展「層級」？",
+                    options: [
+                        { label: "(A) 取得理解", val: "A" },
+                        { label: "(B) 深化應用", val: "B" },
+                        { label: "(C) 創造轉型", val: "C" }
+                    ],
+                    correct: "C"
+                },
+                indicator: "指標 4-3-3 / 表 2-1：發起跨校共創聯盟，結合 RAG 數據優化減少偏誤，重塑跨域創新並創建組織學習文化。",
+                explanation: "發起跨校共創聯盟、運用 RAG 技術進行數據優化以減少文化偏誤，並建立校園組織學習文化，屬於【AI 促進教師專業發展】面向的【創造轉型】層級。"
+            },
+            {
+                id: 9,
+                difficulty: "🔴 困難",
+                title: "第 9 題：AI 倫理桌遊與負責任 AI 準則",
+                description: "劉老師在高中公民與社會科開發了「AI 倫理與社會變革」創新教學模組。他設計了「AI 倫理桌遊」與真實情境模擬活動，引導學生思辨演算法偏見、資料主權及生成式 AI 運算所產生的環境碳足跡等兩難議題，並帶領師生與社群共構出符合永續與包容價值的「校園負責任 AI 實踐準則」。",
+                q1: {
+                    text: "問題（1）：此情境主要屬於教師 AI 素養框架的哪一個「面向」？",
+                    options: [
+                        { label: "(A) AI 倫理", val: "A" },
+                        { label: "(B) AI 基礎與技術", val: "B" },
+                        { label: "(C) AI 賦能教學", val: "C" },
+                        { label: "(D) AI 促進教師專業發展", val: "D" }
+                    ],
+                    correct: "A"
+                },
+                q2: {
+                    text: "問題（2）：此情境主要屬於哪一個發展「層級」？",
+                    options: [
+                        { label: "(A) 取得理解", val: "A" },
+                        { label: "(B) 深化應用", val: "B" },
+                        { label: "(C) 創造轉型", val: "C" }
+                    ],
+                    correct: "C"
+                },
+                indicator: "指標 1-3-2 / 1-3-3 / 表 2-1：開發「倫理桌遊」等創新教學模式，共構師生 AI 倫理實踐準則與思辨社會衝擊。",
+                explanation: "開發「AI 倫理桌遊」創新教學模式，並帶領師生共構實踐準則、探究碳足跡與個資等社會衝擊，屬於【AI 倫理】面向的【創造轉型】層級。"
+            },
+            {
+                id: 10,
+                difficulty: "🔴 困難",
+                title: "第 10 題：無障礙 AI 語音助理專案與包容福祉",
+                description: "一群高中生觀察到校園內視障同儕在設施移動上的不便，自主發起專案。他們從使用者需求出發，採集校園空間環境數據，開發出一套「校園無障礙 AI 語音導覽助理」原型；在開發歷程中，他們進行多輪的使用者訪談測試、評估個人隱私與演算法偏誤，並持續迭代優化系統功能，以實際行動促進人類福祉與社會包容。",
+                q1: {
+                    text: "問題（1）：此情境主要屬於學生 AI 素養框架的哪一個「面向」？",
+                    options: [
+                        { label: "(A) AI 倫理", val: "A" },
+                        { label: "(B) AI 基礎與技術", val: "B" },
+                        { label: "(C) AI 賦能學習", val: "C" },
+                        { label: "(D) AI 系統設計", val: "D" }
+                    ],
+                    correct: "D"
+                },
+                q2: {
+                    text: "問題（2）：此情境主要屬於哪一個發展「層級」？",
+                    options: [
+                        { label: "(A) 取得理解", val: "A" },
+                        { label: "(B) 深化應用", val: "B" },
+                        { label: "(C) 創造轉型", val: "C" }
+                    ],
+                    correct: "C"
+                },
+                indicator: "表 2-2（學生）：創造與優化具價值的 AI 系統，從社會需求與同理心出發，進行迭代微調並確保人類福祉。",
+                explanation: "學生從在地弱勢需求出發，開發 AI 專案原型並進行多輪迭代優化與倫理評估，促進人類福祉，屬於【學生 AI 系統設計】面向的【創造轉型】層級。"
+            }
+        ];
+
+        // 應用程式狀態變數
+        let currentQuestionIndex = 0;
+        let userAnswers = {}; // 儲存格式: { 1: { q1: 'A', q2: 'B' }, ... }
+
+        // 開始測驗
+        function startQuiz() {
+            document.getElementById('start-card').classList.add('hidden');
+            document.getElementById('quiz-card').classList.remove('hidden');
+            currentQuestionIndex = 0;
+            userAnswers = {};
+            renderQuestion();
+        }
+
+        // 渲染當前題目
+        function renderQuestion() {
+            const q = questionsData[currentQuestionIndex];
+            const total = questionsData.length;
+            const progressPercent = Math.round(((currentQuestionIndex + 1) / total) * 100);
+
+            // 更新進度
+            document.getElementById('quiz-progress-text').innerText = `第 ${currentQuestionIndex + 1} / ${total} 題`;
+            document.getElementById('quiz-percent-text').innerText = `${progressPercent}%`;
+            document.getElementById('quiz-progress-bar').style.width = `${progressPercent}%`;
+
+            // 渲染題目細節
+            document.getElementById('scenario-tag').innerText = q.difficulty;
+            document.getElementById('scenario-id').innerText = `第 ${q.id} 題`;
+            document.getElementById('scenario-title').innerText = q.title;
+            document.getElementById('scenario-desc').innerText = q.description;
+
+            // 問題 1 渲染
+            document.getElementById('q1-text').innerText = q.q1.text;
+            const q1OptionsDiv = document.getElementById('q1-options');
+            q1OptionsDiv.innerHTML = q.q1.options.map(opt => `
+                <label class="flex items-center p-3 border rounded-xl cursor-pointer transition hover:bg-slate-50 ${userAnswers[q.id]?.q1 === opt.val ? 'border-indigo-600 bg-indigo-50/60 ring-2 ring-indigo-200' : 'border-slate-200'}">
+                    <input type="radio" name="q1_${q.id}" value="${opt.val}" ${userAnswers[q.id]?.q1 === opt.val ? 'checked' : ''} onchange="selectAnswer(${q.id}, 'q1', '${opt.val}')" class="w-4 h-4 text-indigo-600 focus:ring-indigo-500">
+                    <span class="ml-3 text-sm font-medium text-slate-700">${opt.label}</span>
+                </label>
+            `).join('');
+
+            // 問題 2 渲染
+            document.getElementById('q2-text').innerText = q.q2.text;
+            const q2OptionsDiv = document.getElementById('q2-options');
+            q2OptionsDiv.innerHTML = q.q2.options.map(opt => `
+                <label class="flex items-center p-3 border rounded-xl cursor-pointer transition hover:bg-slate-50 ${userAnswers[q.id]?.q2 === opt.val ? 'border-indigo-600 bg-indigo-50/60 ring-2 ring-indigo-200' : 'border-slate-200'}">
+                    <input type="radio" name="q2_${q.id}" value="${opt.val}" ${userAnswers[q.id]?.q2 === opt.val ? 'checked' : ''} onchange="selectAnswer(${q.id}, 'q2', '${opt.val}')" class="w-4 h-4 text-indigo-600 focus:ring-indigo-500">
+                    <span class="ml-3 text-sm font-medium text-slate-700">${opt.label}</span>
+                </label>
+            `).join('');
+
+            // 隱藏錯誤提示
+            document.getElementById('error-msg').classList.add('hidden');
+
+            // 按鈕文字更新
+            const nextBtnText = document.getElementById('next-btn-text');
+            if (currentQuestionIndex === total - 1) {
+                nextBtnText.innerText = '完成測驗並查看結果';
+            } else {
+                nextBtnText.innerText = '下一題';
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // 記錄使用者選擇
+        function selectAnswer(qId, subQ, val) {
+            if (!userAnswers[qId]) {
+                userAnswers[qId] = {};
+            }
+            userAnswers[qId][subQ] = val;
+            document.getElementById('error-msg').classList.add('hidden');
+            renderQuestion(); // 重新觸發樣式更新
+        }
+
+        // 下一題按鈕動作
+        function nextQuestion() {
+            const q = questionsData[currentQuestionIndex];
+            const currentAns = userAnswers[q.id];
+
+            // 檢查本題 2 個問題是否皆已作答
+            if (!currentAns || !currentAns.q1 || !currentAns.q2) {
+                document.getElementById('error-msg').classList.remove('hidden');
+                return;
+            }
+
+            if (currentQuestionIndex < questionsData.length - 1) {
+                currentQuestionIndex++;
+                renderQuestion();
+            } else {
+                finishQuiz();
+            }
+        }
+
+        // 完成測驗，顯示錯題與分數
+        function finishQuiz() {
+            document.getElementById('quiz-card').classList.add('hidden');
+            document.getElementById('results-card').classList.remove('hidden');
+
+            let totalSubQuestions = questionsData.length * 2;
+            let correctCount = 0;
+            let wrongQuestionsListHTML = '';
+
+            questionsData.forEach(q => {
+                const userAns = userAnswers[q.id] || {};
+                const q1Correct = userAns.q1 === q.q1.correct;
+                const q2Correct = userAns.q2 === q.q2.correct;
+
+                if (q1Correct) correctCount++;
+                if (q2Correct) correctCount++;
+
+                // 如果任何一個小題答錯，加入錯題檢討區
+                if (!q1Correct || !q2Correct) {
+                    const q1UserLabel = q.q1.options.find(o => o.val === userAns.q1)?.label || "未作答";
+                    const q1CorrectLabel = q.q1.options.find(o => o.val === q.q1.correct)?.label;
+                    
+                    const q2UserLabel = q.q2.options.find(o => o.val === userAns.q2)?.label || "未作答";
+                    const q2CorrectLabel = q.q2.options.find(o => o.val === q.q2.correct)?.label;
+
+                    wrongQuestionsListHTML += `
+                        <div class="p-5 border border-slate-200 rounded-xl bg-slate-50/50">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-bold text-slate-800 text-base">${q.title}</span>
+                                <span class="text-xs bg-rose-100 text-rose-700 font-semibold px-2.5 py-0.5 rounded-full">${q.difficulty}</span>
+                            </div>
+                            <p class="text-xs text-slate-600 mb-4 bg-white p-3 rounded-lg border border-slate-100 leading-relaxed">${q.description}</p>
+                            
+                            <div class="space-y-3 mb-4 text-sm">
+                                <!-- Q1 結果 -->
+                                <div class="p-3 rounded-lg ${q1Correct ? 'bg-emerald-50 border border-emerald-200' : 'bg-rose-50 border border-rose-200'}">
+                                    <div class="font-semibold text-slate-800 mb-1">Q1: 面向判斷 ${q1Correct ? '<span class="text-emerald-600 ml-2"><i class="fa-solid fa-circle-check"></i> 答對</span>' : '<span class="text-rose-600 ml-2"><i class="fa-solid fa-circle-xmark"></i> 答錯</span>'}</div>
+                                    <div class="text-xs text-slate-600">您的選擇：<span class="${q1Correct ? 'text-emerald-700 font-bold' : 'text-rose-700 font-bold'}">${q1UserLabel}</span></div>
+                                    ${!q1Correct ? `<div class="text-xs text-emerald-700 font-bold mt-0.5">正確答案：${q1CorrectLabel}</div>` : ''}
+                                </div>
+
+                                <!-- Q2 結果 -->
+                                <div class="p-3 rounded-lg ${q2Correct ? 'bg-emerald-50 border border-emerald-200' : 'bg-rose-50 border border-rose-200'}">
+                                    <div class="font-semibold text-slate-800 mb-1">Q2: 層級判斷 ${q2Correct ? '<span class="text-emerald-600 ml-2"><i class="fa-solid fa-circle-check"></i> 答對</span>' : '<span class="text-rose-600 ml-2"><i class="fa-solid fa-circle-xmark"></i> 答錯</span>'}</div>
+                                    <div class="text-xs text-slate-600">您的選擇：<span class="${q2Correct ? 'text-emerald-700 font-bold' : 'text-rose-700 font-bold'}">${q2UserLabel}</span></div>
+                                    ${!q2Correct ? `<div class="text-xs text-emerald-700 font-bold mt-0.5">正確答案：${q2CorrectLabel}</div>` : ''}
+                                </div>
+                            </div>
+
+                            <div class="bg-indigo-50/70 p-3.5 rounded-lg border border-indigo-100 text-xs">
+                                <div class="font-bold text-indigo-900 mb-1"><i class="fa-solid fa-book-bookmark mr-1"></i> 指標對照與詳細解析：</div>
+                                <div class="text-indigo-800 font-medium mb-1">${q.indicator}</div>
+                                <div class="text-slate-600">${q.explanation}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+
+            if (wrongQuestionsListHTML === '') {
+                wrongQuestionsListHTML = `
+                    <div class="text-center py-8 text-emerald-600">
+                        <i class="fa-solid fa-trophy text-5xl mb-3"></i>
+                        <h4 class="text-xl font-bold">太厲害了！完全沒有答錯的題目！</h4>
+                        <p class="text-sm text-slate-500 mt-1">您對《教師與學生 AI 素養框架》的四大面向與三個發展層級有極為透徹的理解與掌握。</p>
+                    </div>
+                `;
+            }
+
+            // 更新成績面板
+            const scorePercent = Math.round((correctCount / totalSubQuestions) * 100);
+            document.getElementById('score-text').innerText = `${scorePercent}%`;
+            document.getElementById('correct-count-text').innerText = `${correctCount} / ${totalSubQuestions}`;
+            document.getElementById('wrong-questions-list').innerHTML = wrongQuestionsListHTML;
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // 重新開始測驗
+        function restartQuiz() {
+            document.getElementById('results-card').classList.add('hidden');
+            document.getElementById('ai-report-container').classList.add('hidden');
+            document.getElementById('start-card').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // 呼叫 Gemini API 產生 AI 素養自我檢視報告
+        async function generateAIReport() {
+            const reportContainer = document.getElementById('ai-report-container');
+            const reportLoading = document.getElementById('report-loading');
+            const reportContent = document.getElementById('report-content');
+            const btn = document.getElementById('generate-report-btn');
+
+            reportContainer.classList.remove('hidden');
+            reportLoading.classList.remove('hidden');
+            reportContent.classList.add('hidden');
+            btn.disabled = true;
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+
+            // 彙整答題統計資料提供給 LLM
+            let wrongSummary = [];
+            questionsData.forEach(q => {
+                const u = userAnswers[q.id] || {};
+                let status = [];
+                if (u.q1 !== q.q1.correct) status.push("面向選擇錯誤");
+                if (u.q2 !== q.q2.correct) status.push("層級選擇錯誤");
+                if (status.length > 0) {
+                    wrongSummary.push(`第${q.id}題(${q.title})：${status.join('與')}`);
+                }
+            });
+
+            const score = document.getElementById('score-text').innerText;
+            const correctCount = document.getElementById('correct-count-text').innerText;
+
+            const prompt = `
+你是一位熟悉《中小學教師數位與 AI 教學指引》及 AIPACK（人工智慧教學內容知識）框架的教育部 AI 政策專家與教學顧問。
+請根據作答者在「教師與學生 AI 素養框架情境測驗」的答題結果，撰寫一份專業且富含建設性的「教師 AI 素養自我檢視報告」。
+
+【作答者表現】
+- 總正確率：${score}
+- 答對小題數：${correctCount}
+- 答錯題目與面向概要：${wrongSummary.length > 0 ? wrongSummary.join('；') : '全對，無答錯題目'}
+
+【報告撰寫要求】
+1. 使用繁體中文，格式請用好讀的 Markdown HTML (如 <h3>, <h4>, <ul>, <p>, <strong> 等標籤，勿包含全頁 <html>/<head>/<body> 標籤)。
+2. 內容須包含以下四大區塊：
+   - 🌟 **整體 AI 素養表現評估**：針對正確率與整體情境概念給予客觀肯定與綜覽。
+   - 🔍 **AI 素養優勢與關鍵改善領域**：針對答錯或需加強的「面向（AI倫理/基礎技術/賦能教學/促進專業發展）」與「層級（取得理解/深化應用/創造轉型）」進行精確解讀與分析。
+   - 💡 **AIPACK 教學實踐策略**：針對如何在課堂教學中落實 AI 賦能與「慢 AI（引導式學習）」提供實務指引。
+   - 🚀 **未來專業發展行動建議**：提供短期（1-3個月）與中長期（半年以上）的 AI 教學能力提升階梯與具體作法。
+`;
+
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }],
+                        systemInstruction: {
+                            parts: [{ text: "你是一位精通台灣中小學 AI 教育政策、AI 素養框架與 AIPACK 的權威教育顧問。語氣溫暖、專業、精確且極具激勵性。" }]
+                        }
+                    })
+                });
+
+                const result = await response.json();
+                const textResult = result.candidates?.[0]?.content?.parts?.[0]?.text;
+
+                if (textResult) {
+                    reportContent.innerHTML = textResult;
+                } else {
+                    reportContent.innerHTML = "<p class='text-rose-500'>生成報告時遇到結構不完整的狀況，請重試。</p>";
+                }
+            } catch (err) {
+                console.error("Gemini API Error:", err);
+                reportContent.innerHTML = `
+                    <div class="bg-rose-50 border border-rose-200 p-4 rounded-xl text-rose-700 text-sm">
+                        <i class="fa-solid fa-triangle-exclamation mr-1"></i> 報告生成暫時無法連線，請檢查網路連線或稍後再試。
+                    </div>
+                `;
+            } finally {
+                reportLoading.classList.add('hidden');
+                reportContent.classList.remove('hidden');
+                btn.disabled = false;
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                reportContainer.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+    </script>
+</body>
+</html>
